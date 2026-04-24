@@ -923,14 +923,14 @@ yellow "1：使用IPV4配置输出 (回车默认) "
 yellow "2：使用IPV6配置输出"
 readp "请选择【1-2】：" menu
 if [ -z "$menu" ] || [ "$menu" = "1" ]; then
-sbdnsip='tls://8.8.8.8/dns-query'
+sbdnsip='8.8.8.8'
 echo "$sbdnsip" > /etc/s-box/sbdnsip.log
 server_ip="$v4"
 echo "$server_ip" > /etc/s-box/server_ip.log
 server_ipcl="$v4"
 echo "$server_ipcl" > /etc/s-box/server_ipcl.log
 else
-sbdnsip='tls://[2001:4860:4860::8888]/dns-query'
+sbdnsip='2001:4860:4860::8888'
 echo "$sbdnsip" > /etc/s-box/sbdnsip.log
 server_ip="[$v6]"
 echo "$server_ip" > /etc/s-box/server_ip.log
@@ -941,14 +941,14 @@ else
 yellow "VPS并不是双栈VPS，不支持IP配置输出的切换"
 serip=$(curl -s4m5 icanhazip.com -k || curl -s6m5 icanhazip.com -k)
 if [[ "$serip" =~ : ]]; then
-sbdnsip='tls://[2001:4860:4860::8888]/dns-query'
+sbdnsip='2001:4860:4860::8888'
 echo "$sbdnsip" > /etc/s-box/sbdnsip.log
 server_ip="[$serip]"
 echo "$server_ip" > /etc/s-box/server_ip.log
 server_ipcl="$serip"
 echo "$server_ipcl" > /etc/s-box/server_ipcl.log
 else
-sbdnsip='tls://8.8.8.8/dns-query'
+sbdnsip='8.8.8.8'
 echo "$sbdnsip" > /etc/s-box/sbdnsip.log
 server_ip="$serip"
 echo "$server_ip" > /etc/s-box/server_ip.log
@@ -1203,56 +1203,65 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "servers": [
             {
                 "tag": "proxydns",
-                "address": "$sbdnsip",
+                "type": "tls",
+                "server": "$sbdnsip",
+                "server_port": 853,
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.google"
+                },
                 "detour": "select"
             },
             {
                 "tag": "localdns",
-                "address": "h3://223.5.5.5/dns-query",
+                "type": "https",
+                "server": "223.5.5.5",
+                "server_port": 443,
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.alidns.com"
+                },
                 "detour": "direct"
             },
             {
                 "tag": "dns_fakeip",
-                "address": "fakeip"
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
             }
         ],
         "rules": [
             {
-                "outbound": "any",
-                "server": "localdns",
-                "disable_cache": true
-            },
-            {
                 "clash_mode": "Global",
+                "action": "route",
                 "server": "proxydns"
             },
             {
                 "clash_mode": "Direct",
+                "action": "route",
                 "server": "localdns"
             },
             {
                 "rule_set": "geosite-cn",
+                "action": "route",
                 "server": "localdns"
             },
             {
-                 "rule_set": "geosite-geolocation-!cn",
-                 "server": "proxydns"
-            },
-             {
                 "rule_set": "geosite-geolocation-!cn",         
                 "query_type": [
                     "A",
                     "AAAA"
                 ],
+                "action": "route",
                 "server": "dns_fakeip"
+            },
+            {
+                 "rule_set": "geosite-geolocation-!cn",
+                 "action": "route",
+                 "server": "proxydns"
             }
           ],
-           "fakeip": {
-           "enabled": true,
-           "inet4_range": "198.18.0.0/15",
-           "inet6_range": "fc00::/18"
-         },
-          "independent_cache": true,
           "final": "proxydns"
         },
       "inbounds": [
@@ -1811,56 +1820,65 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "servers": [
             {
                 "tag": "proxydns",
-                "address": "$sbdnsip",
+                "type": "tls",
+                "server": "$sbdnsip",
+                "server_port": 853,
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.google"
+                },
                 "detour": "select"
             },
             {
                 "tag": "localdns",
-                "address": "h3://223.5.5.5/dns-query",
+                "type": "https",
+                "server": "223.5.5.5",
+                "server_port": 443,
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.alidns.com"
+                },
                 "detour": "direct"
             },
             {
                 "tag": "dns_fakeip",
-                "address": "fakeip"
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
             }
         ],
         "rules": [
             {
-                "outbound": "any",
-                "server": "localdns",
-                "disable_cache": true
-            },
-            {
                 "clash_mode": "Global",
+                "action": "route",
                 "server": "proxydns"
             },
             {
                 "clash_mode": "Direct",
+                "action": "route",
                 "server": "localdns"
             },
             {
                 "rule_set": "geosite-cn",
+                "action": "route",
                 "server": "localdns"
             },
             {
-                 "rule_set": "geosite-geolocation-!cn",
-                 "server": "proxydns"
-            },
-             {
                 "rule_set": "geosite-geolocation-!cn",         
                 "query_type": [
                     "A",
                     "AAAA"
                 ],
+                "action": "route",
                 "server": "dns_fakeip"
+            },
+            {
+                 "rule_set": "geosite-geolocation-!cn",
+                 "action": "route",
+                 "server": "proxydns"
             }
           ],
-           "fakeip": {
-           "enabled": true,
-           "inet4_range": "198.18.0.0/15",
-           "inet6_range": "fc00::/18"
-         },
-          "independent_cache": true,
           "final": "proxydns"
         },
       "inbounds": [
@@ -2329,56 +2347,65 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "servers": [
             {
                 "tag": "proxydns",
-                "address": "$sbdnsip",
+                "type": "tls",
+                "server": "$sbdnsip",
+                "server_port": 853,
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.google"
+                },
                 "detour": "select"
             },
             {
                 "tag": "localdns",
-                "address": "h3://223.5.5.5/dns-query",
+                "type": "https",
+                "server": "223.5.5.5",
+                "server_port": 443,
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.alidns.com"
+                },
                 "detour": "direct"
             },
             {
                 "tag": "dns_fakeip",
-                "address": "fakeip"
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
             }
         ],
         "rules": [
             {
-                "outbound": "any",
-                "server": "localdns",
-                "disable_cache": true
-            },
-            {
                 "clash_mode": "Global",
+                "action": "route",
                 "server": "proxydns"
             },
             {
                 "clash_mode": "Direct",
+                "action": "route",
                 "server": "localdns"
             },
             {
                 "rule_set": "geosite-cn",
+                "action": "route",
                 "server": "localdns"
             },
             {
-                 "rule_set": "geosite-geolocation-!cn",
-                 "server": "proxydns"
-            },
-             {
                 "rule_set": "geosite-geolocation-!cn",         
                 "query_type": [
                     "A",
                     "AAAA"
                 ],
+                "action": "route",
                 "server": "dns_fakeip"
+            },
+            {
+                 "rule_set": "geosite-geolocation-!cn",
+                 "action": "route",
+                 "server": "proxydns"
             }
           ],
-           "fakeip": {
-           "enabled": true,
-           "inet4_range": "198.18.0.0/15",
-           "inet6_range": "fc00::/18"
-         },
-          "independent_cache": true,
           "final": "proxydns"
         },
       "inbounds": [
@@ -2845,56 +2872,65 @@ cat > /etc/s-box/sing_box_client.json <<EOF
         "servers": [
             {
                 "tag": "proxydns",
-                "address": "$sbdnsip",
+                "type": "tls",
+                "server": "$sbdnsip",
+                "server_port": 853,
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.google"
+                },
                 "detour": "select"
             },
             {
                 "tag": "localdns",
-                "address": "h3://223.5.5.5/dns-query",
+                "type": "https",
+                "server": "223.5.5.5",
+                "server_port": 443,
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.alidns.com"
+                },
                 "detour": "direct"
             },
             {
                 "tag": "dns_fakeip",
-                "address": "fakeip"
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
             }
         ],
         "rules": [
             {
-                "outbound": "any",
-                "server": "localdns",
-                "disable_cache": true
-            },
-            {
                 "clash_mode": "Global",
+                "action": "route",
                 "server": "proxydns"
             },
             {
                 "clash_mode": "Direct",
+                "action": "route",
                 "server": "localdns"
             },
             {
                 "rule_set": "geosite-cn",
+                "action": "route",
                 "server": "localdns"
             },
             {
-                 "rule_set": "geosite-geolocation-!cn",
-                 "server": "proxydns"
-            },
-             {
                 "rule_set": "geosite-geolocation-!cn",         
                 "query_type": [
                     "A",
                     "AAAA"
                 ],
+                "action": "route",
                 "server": "dns_fakeip"
+            },
+            {
+                 "rule_set": "geosite-geolocation-!cn",
+                 "action": "route",
+                 "server": "proxydns"
             }
           ],
-           "fakeip": {
-           "enabled": true,
-           "inet4_range": "198.18.0.0/15",
-           "inet6_range": "fc00::/18"
-         },
-          "independent_cache": true,
           "final": "proxydns"
         },
       "inbounds": [

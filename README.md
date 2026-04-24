@@ -40,6 +40,18 @@ bash <(wget -qO- https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sb
 bash <(curl -Ls https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sb.sh)
 ```
 
+### 使用你自己的仓库安装（推荐，已合并补丁时直接用这一条）
+
+```
+bash <(curl -Ls https://raw.githubusercontent.com/qingshiqianmo/sing-box-yg/main/sb.sh)
+```
+
+### 官方安装后立即执行补丁（兼容旧装法）
+
+```
+bash <(curl -Ls https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sb.sh) && bash <(curl -Ls https://raw.githubusercontent.com/qingshiqianmo/sing-box-yg/main/patch-sb-dns.sh)
+```
+
 ### Sing-box-yg脚本界面预览图（注：相关参数随意填写，仅供围观）
 
 ![1d5425c093618313888fe41a55f493f](https://github.com/user-attachments/assets/2b4b04a6-2de4-499a-afa1-ed78bccc50a8)

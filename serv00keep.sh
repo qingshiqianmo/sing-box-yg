@@ -764,56 +764,65 @@ cat > sing_box.json <<EOF
         "servers": [
             {
                 "tag": "proxydns",
-                "address": "tls://8.8.8.8/dns-query",
+                "type": "tls",
+                "server": "8.8.8.8",
+                "server_port": 853,
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.google"
+                },
                 "detour": "select"
             },
             {
                 "tag": "localdns",
-                "address": "h3://223.5.5.5/dns-query",
+                "type": "https",
+                "server": "223.5.5.5",
+                "server_port": 443,
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "server_name": "dns.alidns.com"
+                },
                 "detour": "direct"
             },
             {
                 "tag": "dns_fakeip",
-                "address": "fakeip"
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
             }
         ],
         "rules": [
             {
-                "outbound": "any",
-                "server": "localdns",
-                "disable_cache": true
-            },
-            {
                 "clash_mode": "Global",
+                "action": "route",
                 "server": "proxydns"
             },
             {
                 "clash_mode": "Direct",
+                "action": "route",
                 "server": "localdns"
             },
             {
                 "rule_set": "geosite-cn",
+                "action": "route",
                 "server": "localdns"
             },
             {
-                 "rule_set": "geosite-geolocation-!cn",
-                 "server": "proxydns"
-            },
-             {
                 "rule_set": "geosite-geolocation-!cn",         
                 "query_type": [
                     "A",
                     "AAAA"
                 ],
+                "action": "route",
                 "server": "dns_fakeip"
+            },
+            {
+                 "rule_set": "geosite-geolocation-!cn",
+                 "action": "route",
+                 "server": "proxydns"
             }
           ],
-           "fakeip": {
-           "enabled": true,
-           "inet4_range": "198.18.0.0/15",
-           "inet6_range": "fc00::/18"
-         },
-          "independent_cache": true,
           "final": "proxydns"
         },
       "inbounds": [
