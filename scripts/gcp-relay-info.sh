@@ -164,11 +164,9 @@ if [[ -f /root/ygkkkca/ca.log ]]; then
     [[ -n "$REAL_SNI" ]] && SNI="$REAL_SNI"
 fi
 
-# 获取 VPS IP（用于精细化防火墙规则）
+# VPS IP 仅在设置了 VPS_IP 环境变量时才用于限定防火墙来源
+# 默认允许所有来源（0.0.0.0/0），如需限制请：export VPS_IP=38.97.250.99
 VPS_IP="${VPS_IP:-}"
-if [[ -z "$VPS_IP" ]]; then
-    read -p "$(yellow "请输入 VPS 的公网 IP（用于限定防火墙来源，回车跳过允许所有）：")" VPS_IP
-fi
 
 # 显示提取到的配置
 echo
